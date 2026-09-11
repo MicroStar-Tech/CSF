@@ -112,20 +112,30 @@ void Rasterization::RasterTerrian(Cloth          & cloth,
         int    col    = int(deltaX / cloth.step_x + 0.5);
         int    row    = int(deltaZ / cloth.step_y + 0.5);
 
-        if ((col >= 0) && (row >= 0)) {
-            Particle *pt = cloth.getParticle(col, row);
-            pt->correspondingLidarPointList.push_back(i);
-            double pc2particleDist = SQUARE_DIST(
-                pc_x, pc_z,
-                pt->getPos().f[0],
-                pt->getPos().f[2]
-            );
+        if (col < 0) {
+            col = 0;
+        } else if (col >= cloth.num_particles_width) {
+            col = cloth.num_particles_width - 1;
+        }
 
-            if (pc2particleDist < pt->tmpDist) {
-                pt->tmpDist            = pc2particleDist;
-                pt->nearestPointHeight = pc[i].y;
-                pt->nearestPointIndex  = i;
-            }
+        if (row < 0) {
+            row = 0;
+        } else if (row >= cloth.num_particles_height) {
+            row = cloth.num_particles_height - 1;
+        }
+
+        Particle *pt = cloth.getParticle(col, row);
+        pt->correspondingLidarPointList.push_back(i);
+        double pc2particleDist = SQUARE_DIST(
+            pc_x, pc_z,
+            pt->getPos().f[0],
+            pt->getPos().f[2]
+        );
+
+        if (pc2particleDist < pt->tmpDist) {
+            pt->tmpDist            = pc2particleDist;
+            pt->nearestPointHeight = pc[i].y;
+            pt->nearestPointIndex  = i;
         }
     }
     heightVal.resize(cloth.getSize());

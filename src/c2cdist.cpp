@@ -26,6 +26,9 @@ void c2cdist::calCloud2CloudDist(Cloth           & cloth,
     groundIndexes.resize(0);
     offGroundIndexes.resize(0);
 
+    const int maxCol = cloth.num_particles_width - 1;
+    const int maxRow = cloth.num_particles_height - 1;
+
     for (std::size_t i = 0; i < pc.size(); i++) {
         double pc_x = pc[i].x;
         double pc_z = pc[i].z;
@@ -35,12 +38,38 @@ void c2cdist::calCloud2CloudDist(Cloth           & cloth,
 
         int col0 = int(deltaX / cloth.step_x);
         int row0 = int(deltaZ / cloth.step_y);
+
+        // Points on the last cloth row/column (or just past it due to
+        // floating-point rounding of the grid size) would otherwise make
+        // col0+1 / row0+1 index past particles. getParticle() is unchecked.
+        if (col0 < 0) {
+            col0 = 0;
+        } else if (col0 > maxCol) {
+            col0 = maxCol;
+        }
+
+        if (row0 < 0) {
+            row0 = 0;
+        } else if (row0 > maxRow) {
+            row0 = maxRow;
+        }
+
         int col1 = col0 + 1;
         int row1 = row0;
         int col2 = col0 + 1;
         int row2 = row0 + 1;
         int col3 = col0;
         int row3 = row0 + 1;
+
+        if (col1 > maxCol) {
+            col1 = maxCol;
+            col2 = maxCol;
+        }
+
+        if (row2 > maxRow) {
+            row2 = maxRow;
+            row3 = maxRow;
+        }
 
         double subdeltaX = (deltaX - col0 * cloth.step_x) / cloth.step_x;
         double subdeltaZ = (deltaZ - row0 * cloth.step_y) / cloth.step_y;
