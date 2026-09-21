@@ -38,3 +38,9 @@ endif()
 install(TARGETS CSF LIBRARY DESTINATION lib)
 install(TARGETS CSF ARCHIVE DESTINATION lib)
 install(FILES ${CSF_HEADERS} DESTINATION include)
+
+target_compile_options(CSF
+        PRIVATE $<$<CXX_COMPILER_ID:GNU>:-flto=auto>
+        PRIVATE $<$<CXX_COMPILER_ID:Clang>:-flto=thin>
+        PRIVATE -O3
+        )
